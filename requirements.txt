@@ -1,3 +1,5 @@
+gdown
+setuptools
 numpy
 matplotlib
 seaborn
@@ -8,4 +10,3 @@ xgboost
 tensorflow
 keras
 keras-tuner
-gdown
