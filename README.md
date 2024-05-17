@@ -89,11 +89,19 @@ based on the evaluation metrics being displayed.
 **Team Contribution**
 
 Mahamaya, Aradhya : Data Collection & EDA, Airbnb Dataset
+
 Shashi, Bhavan : Data Collection & EDA, Zillow Dataset
+
 Mahamaya, Aradhya : Data Pre-processing, Airbnb Dataset
+
 Shashi, Bhavan : Data Pre-processing, Zillow Dataset
+
 Shashi, Bhavan : Model Development, Random Forest Regressor and XG Boost Regressor
+
 Aradhya, Bhavan : Model Development, Linear Regression
+
 Mahamaya, Aradhya : Model Development, N-BEATS and Long-Term Short Memory (LSTM)
+
 Shashi, Mahamaya : Power BI Data Analysis, Zillow and Airbnb Dashboard
+
 Aradhya, Bhavan : Power BI Data Analysis, Comparison, and Prediction Dashboard for Airbnb and Zillow Datasets
