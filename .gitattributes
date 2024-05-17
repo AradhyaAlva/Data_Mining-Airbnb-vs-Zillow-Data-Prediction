@@ -1,1 +1,2 @@
 *.ext filter=lfs diff=lfs merge=lfs -text
+data/all_zillow_processed.csv filter=lfs diff=lfs merge=lfs -text

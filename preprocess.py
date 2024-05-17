@@ -55,15 +55,15 @@ class DataPreprocessor:
         return df[columns]
 
     def clean_airbnb(self, df):
-        df['price'] = df['price'].str.replace(r'[^\d.]', '', regex=True).astype(float)
-        df['beds'] = df['beds'].fillna(0).astype(int)
-        df['amenities_count'] = df['amenities'].apply(lambda x: len(x.split(',')))
-        df = df.drop(columns=['amenities', 'bathrooms'], errors='ignore')  # Safely attempt to drop columns
-        
-        review_cols = ['minimum_nights', 'availability_365', 'number_of_reviews', 'review_scores_rating', 
-                       'review_scores_accuracy', 'review_scores_value']
+        df.loc[:, 'price'] = df['price'].str.replace(r'[^\d.]', '', regex=True).astype(float)
+        df.loc[:, 'beds'] = df['beds'].fillna(0).astype(int)
+        df.loc[:, 'amenities_count'] = df['amenities'].apply(lambda x: len(x.split(',')))
+        df = df.drop(columns=['amenities', 'bathrooms'], errors='ignore')
+
+        review_cols = ['minimum_nights', 'availability_365', 'number_of_reviews', 'review_scores_rating',
+                   'review_scores_accuracy', 'review_scores_value']
         for col in review_cols:
-            df[col].fillna(df[col].mean(), inplace=True)
+            df.loc[:, col] = df[col].fillna(df[col].mean())
         return df
 
     def encode_and_impute(self, df):

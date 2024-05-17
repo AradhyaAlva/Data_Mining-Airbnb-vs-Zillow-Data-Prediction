@@ -6,6 +6,8 @@ from sklearn.model_selection import train_test_split
 from model import (get_preprocessor, linear_regression_model, random_forest_model, xgboost_model,
                    create_base_n_beats_model, create_base_lstm_model,n_beats_model_builder,lstm_model_builder, save_model, tune_hyperparameters, setup_neural_network_tuning)
 from keras_tuner import HyperParameters
+from sklearn.metrics import mean_absolute_error, r2_score
+
 
 # Ensure the 'models' directory exists
 os.makedirs('models', exist_ok=True)
@@ -43,6 +45,8 @@ models_airbnb = {
 # Load and split data
 X_airbnb = airbnb_data.drop('price', axis=1)
 y_airbnb = airbnb_data['price']
+y_airbnb = airbnb_data['price'].fillna(airbnb_data['price'].mean())
+
 
 scaler = StandardScaler()
 
@@ -66,22 +70,61 @@ X_val_airbnb, X_test_airbnb, y_val_airbnb, y_test_airbnb = train_test_split(X_te
 X_train_zillow, X_temp_zillow, y_train_zillow, y_temp_zillow = train_test_split(X_zillow, y_zillow, test_size=0.3, random_state=42)
 X_val_zillow, X_test_zillow, y_val_zillow, y_test_zillow = train_test_split(X_temp_zillow, y_temp_zillow, test_size=0.5, random_state=42)
 
+# Save the preprocessed test data as CSV files for Airbnb
+X_test_airbnb.to_csv('data/airbnb_test.csv', index=False)
+y_test_airbnb.to_csv('data/airbnb_test_labels.csv', index=False, header=['price'])
+
+# Save the preprocessed test data as CSV files for Zillow
+X_test_zillow.to_csv('data/zillow_test.csv', index=False)
+y_test_zillow.to_csv('data/zillow_test_labels.csv', index=False, header=['2023-12-31'])
+
+# Initialize base models for Airbnb
+linear_regression_base = linear_regression_model(preprocessor_airbnb)
+random_forest_base = random_forest_model(preprocessor_airbnb)
+xgboost_base = xgboost_model(preprocessor_airbnb)
+
 # Train base models for Airbnb
-for name, model in models_airbnb.items():
-    model.fit(X_train_airbnb, y_train_airbnb)
-    save_model(model, f'models/{name}_base_airbnb.joblib')
+linear_regression_base.fit(X_train_airbnb, y_train_airbnb)
+val_mae = mean_absolute_error(y_val_airbnb, linear_regression_base.predict(X_val_airbnb))
+val_r2 = r2_score(y_val_airbnb, linear_regression_base.predict(X_val_airbnb))
+print(f"linear_regression_base\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
+
+random_forest_base.fit(X_train_airbnb, y_train_airbnb)
+val_mae = mean_absolute_error(y_val_airbnb, random_forest_base.predict(X_val_airbnb))
+val_r2 = r2_score(y_val_airbnb, random_forest_base.predict(X_val_airbnb))
+print(f"random_forest_base\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
+
+xgboost_base.fit(X_train_airbnb, y_train_airbnb)
+val_mae = mean_absolute_error(y_val_airbnb, xgboost_base.predict(X_val_airbnb))
+val_r2 = r2_score(y_val_airbnb, xgboost_base.predict(X_val_airbnb))
+print(f"xgboost_base\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
+
+
+# Save base models for Airbnb
+save_model(linear_regression_base, 'models/linear_regression_base_model_airbnb.joblib')
+save_model(random_forest_base, 'models/random_forest_base_model_airbnb.joblib')
+save_model(xgboost_base, 'models/xgboost_base_model_airbnb.joblib')
 
 # Tune and retrain Airbnb models
-best_lr = tune_hyperparameters(models_airbnb["Linear Regression"], param_grid_lr, X_train_airbnb, y_train_airbnb)
-best_rf = tune_hyperparameters(models_airbnb["Random Forest"], param_grid_rf, X_train_airbnb, y_train_airbnb)
-best_xgb = tune_hyperparameters(models_airbnb["XGBoost"], param_grid_xgb, X_train_airbnb, y_train_airbnb)
+best_lr = tune_hyperparameters(linear_regression_base, param_grid_lr, X_train_airbnb, y_train_airbnb)
+test_mae = mean_absolute_error(y_test_airbnb, best_lr.predict(X_test_airbnb))
+test_r2 = r2_score(y_test_airbnb, best_lr.predict(X_test_airbnb))
+print(f"best_lr\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
+
+best_rf = tune_hyperparameters(random_forest_base, param_grid_rf, X_train_airbnb, y_train_airbnb)
+test_mae = mean_absolute_error(y_test_airbnb, best_rf.predict(X_test_airbnb))
+test_r2 = r2_score(y_test_airbnb, best_rf.predict(X_test_airbnb))
+print(f"best_rf\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
+
+best_xgb = tune_hyperparameters(xgboost_base, param_grid_xgb, X_train_airbnb, y_train_airbnb)
+test_mae = mean_absolute_error(y_test_airbnb, best_xgb.predict(X_test_airbnb))
+test_r2 = r2_score(y_test_airbnb, best_xgb.predict(X_test_airbnb))
+print(f"best_xgb\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
 
 # Save tuned Airbnb models
-save_model(best_lr, 'models/lr_tuned_model_airbnb.joblib')
-save_model(best_rf, 'models/rf_tuned_model_airbnb.joblib')
-save_model(best_xgb, 'models/xgb_tuned_model_airbnb.joblib')
-
-# input_dim = 32  # Adjust this value based on your hyperparameter choices
+save_model(best_lr, 'models/linear_regression_tuned_model_airbnb.joblib')
+save_model(best_rf, 'models/random_forest_tuned_model_airbnb.joblib')
+save_model(best_xgb, 'models/xgboost_tuned_model_airbnb.joblib')
 
 # Convert data for LSTM (reshape)
 X_train_zillow_lstm = X_train_zillow.values.reshape(X_train_zillow.shape[0], 1, X_train_zillow.shape[1])
@@ -101,25 +144,38 @@ y_val_zillow = y_val_zillow.astype(np.float32)
 y_train_zillow = np.nan_to_num(y_train_zillow)
 y_val_zillow = np.nan_to_num(y_val_zillow)
 
-
 # Initialize and fit base models for Zillow
 input_shape = X_train_zillow.shape[1]  # Feature dimension for N-Beats
 n_beats_base = create_base_n_beats_model(input_shape)
 lstm_base = create_base_lstm_model(input_shape)
 
 # Fit base models
-n_beats_base.fit(X_train_zillow, y_train_zillow, epochs=1, validation_data=(X_val_zillow, y_val_zillow))
-lstm_base.fit(X_train_zillow_lstm, y_train_zillow, epochs=1, validation_data=(X_val_zillow_lstm, y_val_zillow))
+n_beats_base.fit(X_train_zillow, y_train_zillow, epochs=100, validation_data=(X_val_zillow, y_val_zillow))
+val_mae = mean_absolute_error(y_val_zillow, n_beats_base.predict(X_val_zillow))
+val_r2 = r2_score(y_val_zillow, n_beats_base.predict(X_val_zillow))
+print(f"n_beats_base\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
 
-# Save base models
-n_beats_base.save('models/n_beats_base_model.h5')
-lstm_base.save('models/lstm_base_model.h5')
+lstm_base.fit(X_train_zillow_lstm, y_train_zillow, epochs=100, validation_data=(X_val_zillow_lstm, y_val_zillow))
+val_mae = mean_absolute_error(y_val_zillow, lstm_base.predict(X_val_zillow_lstm))
+val_r2 = r2_score(y_val_zillow, lstm_base.predict(X_val_zillow_lstm))
+print(f"lstm_base\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
 
-# Adjust input shapes and data shapes as needed 
+# Save base models for Zillow
+n_beats_base.save('models/n_beats_base_model_zillow.h5')
+lstm_base.save('models/lstm_base_model_zillow.h5')
+
+# Adjust input shapes and data shapes as needed
 best_n_beats = setup_neural_network_tuning(n_beats_model_builder, X_train_zillow, y_train_zillow, X_val_zillow, y_val_zillow)
+val_mae = mean_absolute_error(y_val_zillow, best_n_beats.predict(X_val_zillow))
+val_r2 = r2_score(y_val_zillow, best_n_beats.predict(X_val_zillow))
+print(f"best_n_beats\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
+
 best_lstm = setup_neural_network_tuning(lstm_model_builder, X_train_zillow_lstm, y_train_zillow, X_val_zillow_lstm, y_val_zillow)
+val_mae = mean_absolute_error(y_val_zillow, best_lstm.predict(X_val_zillow_lstm))
+val_r2 = r2_score(y_val_zillow, best_lstm.predict(X_val_zillow_lstm))
+print(f"best_lstm\nValidation MAE: {val_mae:.2f}, Validation R-squared: {val_r2:.2f}")
 
 # Save the best models from tuning
-best_n_beats.save('models/n_beats_tuned_model.h5')
-best_lstm.save('models/lstm_tuned_model.h5')
+best_n_beats.save('models/n_beats_tuned_model_zillow.h5')
+best_lstm.save('models/lstm_tuned_model_zillow.h5')
 

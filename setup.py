@@ -19,15 +19,15 @@ class ExtractCommand(Command):
             'zillow_3b.csv': "1T4MH6fPzjzzxaeN7ucPDIeswwmhEHzgl",
             'zillow_4b.csv': "1AmcIgfHgwMNjpDLaQ-2cvcr-RE0eWvnQ",
             'zillow_5b.csv': "1zuNwh6bSeuJnqnBNCs1rwo0yIJqXSClq",
-            'sf_listings.csv': "1F4S88V2rmSM0xK8NJAHuxP6tLn-2O73y",
-            'portland_listings.csv': "1VwFcHzWLXuapzfotSpHtthAL5lWzv9qC",
-            'nyc_listings.csv': "18nTcpGj1AVB2li5nbWuecSNBVcsWl3er",
-            'new_orleans_listings.csv': "1q_1pTQbsy28aiaGHPGF4XDoUh3MsCZHk",
-            'seattle_listings.csv': "1jDOrPAZGT6j6_IwHm7qegRg0vMaEeiZp",
-            'san_diego_listings.csv': "1qJmQwc8hzgMGy8NFM6Zfi3plmzmkHSC2",
-            'la_listings.csv': "10BjAuNEI46xBLcFncM0cjuQfUsROAN2i",
-            'denver_listings.csv': "1eIDZflCvayCz3uSjFeMAfoc-QTdz4lqU",
-            'boston_listings.csv': "1Dw4L3U-qsxuJYw0YM1kVL6-69xQot623"
+            'SanFrancisco_listings.csv': "1F4S88V2rmSM0xK8NJAHuxP6tLn-2O73y",
+            'Portland_listings.csv': "1VwFcHzWLXuapzfotSpHtthAL5lWzv9qC",
+            'NewYork_listings.csv': "18nTcpGj1AVB2li5nbWuecSNBVcsWl3er",
+            'NewOrleans_listings.csv': "1q_1pTQbsy28aiaGHPGF4XDoUh3MsCZHk",
+            'Seattle_listings.csv': "1jDOrPAZGT6j6_IwHm7qegRg0vMaEeiZp",
+            'SanDiego_listings.csv': "1qJmQwc8hzgMGy8NFM6Zfi3plmzmkHSC2",
+            'LosAngeles_listings.csv': "10BjAuNEI46xBLcFncM0cjuQfUsROAN2i",
+            'Denver_listings.csv': "1eIDZflCvayCz3uSjFeMAfoc-QTdz4lqU",
+            'Boston_listings.csv': "1Dw4L3U-qsxuJYw0YM1kVL6-69xQot623"
         }
         base_url = 'https://drive.google.com/uc?id='
         
